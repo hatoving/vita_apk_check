@@ -1,0 +1,4 @@
+*.o
+*.apk
+vita_apk_check
+config.txt
