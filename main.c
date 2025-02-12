@@ -361,9 +361,9 @@ int main(int argc, char *argv[]){
             int lib_count = 0;
             
             MKDIR("temp");
-            MKDIR("temp\\lib");
-            MKDIR("temp\\lib\\armeabi");
-            MKDIR("temp\\lib\\armeabi-v7a");
+            MKDIR("temp/lib");
+            MKDIR("temp/lib/armeabi");
+            MKDIR("temp/lib/armeabi-v7a");
 
             do {
                 char filename[MAX_PATH_LENGTH];
@@ -569,7 +569,7 @@ int main(int argc, char *argv[]){
             printf(LOG_YELLOW "- The .APK uses the Android NDK, which means that\n  it very likely has android_main as it's main\n  entry point and that it uses certain NDK functions\n  like ANativeActivity_onCreate. You should check\n  out v-atamanenko's port of Galaxy on Fire 2 for\n  reference and use FalsoNDK, also by v-atamanenko,\n  to port the .APK.\n" LOG_RESET);
         }
         if (is_gms) {
-            printf(LOG_GREEN "- The .APK is made in either made in GameMaker\n  or GameMaker: Studio. You should be able to use\n  YoYoLoader by Rinnegatamante for\n  this game.\n" LOG_RESET);
+            printf(LOG_GREEN "- The .APK is made in either made in GameMaker\n  or GameMaker: Studio. You should be able to\n  use YoYoLoader by Rinnegatamante for this game.\n" LOG_RESET);
         }
         if (is_java_gdx) {
             printf(LOG_MAGENTA "- The .APK uses libGDX as it's framework, which\n  likely means the entire engine/game is written\n  in Java. This can theoretically ported if everything\n  Java related gets reimplemented on the\n  loader side." LOG_RESET);

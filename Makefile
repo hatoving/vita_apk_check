@@ -4,19 +4,17 @@ ifeq ($(OS),Windows_NT)
 	CC = gcc
 	CFLAGS = -Wall -Wextra -O2 -static -lm -lz
 	RM = del /Q
-	EXE_EXT = .exe
 else
 	# Unix settings
 	CC = gcc
 	CFLAGS = -Wall -Wextra -O2 -L/usr/lib -lm -lz
 	RM = rm -f
-	EXE_EXT =
 endif
 
 # Cross-compiler settings for Windows builds (Forcing static zlib)
 WINDOWS_CC = x86_64-w64-mingw32-gcc
 WINDOWS_CFLAGS = -Wall -Wextra -O2 -L/usr/x86_64-w64-mingw32/lib -Wl,-Bstatic -lz -Wl,-Bdynamic -static-libgcc -static-libstdc++
-WINDOWS_TARGET = vita_apk_check.exe
+WINDOWS_TARGET = vita_apk_check_win.exe
 
 # Source files
 SRCS = unzip.c ioapi.c main.c
@@ -25,7 +23,7 @@ SRCS = unzip.c ioapi.c main.c
 OBJS = $(SRCS:.c=.o)
 
 # Executable name
-TARGET = vita_apk_check$(EXE_EXT)
+TARGET = vita_apk_check_linux
 
 # Default target
 all: $(TARGET)
