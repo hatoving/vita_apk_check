@@ -1,5 +1,5 @@
 # What is this?
-This is a program you can use to check if an Android game you'd wanna see on the PS Vita be ported. Based on withLogic's original Python script, this is a precompiled program, meaning you can just run it and go.
+This is a program you can use to check if an Android game you'd wanna see on the PS Vita is able to be ported or not. Based on withLogic's original Python script, this is a precompiled program, meaning you can just run it and go.
 
 # Usage
 The program will ask you where your installation of VitaSDK is. If you haven't installed it yet, go do so here: https://vitasdk.org/
