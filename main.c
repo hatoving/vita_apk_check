@@ -40,8 +40,13 @@ typedef struct {
 #define LOG_GREY "\033[90m"
 #define LOG_CYAN "\033[96m"
 
-#define APK_PATTERN "*.apk"
-#define SO_PATTERN "*.so"
+#ifdef _WIN32
+    #include <direct.h>
+    #define MKDIR(path) _mkdir(path)
+#else
+    #include <sys/stat.h>
+    #define MKDIR(path) mkdir(path, 0777)
+#endif
 
 #pragma endregion
 
@@ -355,10 +360,10 @@ int main(int argc, char *argv[]){
             so_file loaded_libs[MAX_LIBS] = {0};
             int lib_count = 0;
             
-            mkdir("temp", 0777);
-            mkdir("temp/lib/", 0777);
-            mkdir("temp/lib/armeabi/", 0777);
-            mkdir("temp/lib/armeabi-v7a/", 0777);
+            MKDIR("temp");
+            MKDIR("temp\\lib");
+            MKDIR("temp\\lib\\armeabi");
+            MKDIR("temp\\lib\\armeabi-v7a");
 
             do {
                 char filename[MAX_PATH_LENGTH];
