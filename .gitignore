@@ -1,6 +1,7 @@
 *.o
 *.apk
 *.exe
+vita_apk_check_linux
 symbols.txt
 vita_apk_check
 config.txt

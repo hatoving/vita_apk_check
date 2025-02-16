@@ -208,6 +208,54 @@ void delete_files_in_directory(const char *path) {
     closedir(dir);
 }
 
+void replace_char(char *s, char c1, char c2) {
+    while (*s) {
+        if (*s == c1) {
+            *s = c2;
+        }
+        s++;
+    }
+}
+
+char *replace_str(char *orig, char *rep, char *with) {
+    char *result;
+    char *ins;
+    char *tmp;
+    int len_rep;
+    int len_with;
+    int len_front;
+    int count;
+
+    if (!orig || !rep)
+        return NULL;
+    len_rep = strlen(rep);
+    if (len_rep == 0)
+        return NULL;
+    if (!with)
+        with = "";
+    len_with = strlen(with);
+
+    ins = orig;
+    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
+        ins = tmp + len_rep;
+    }
+
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+    if (!result)
+        return NULL;
+
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep;
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+
 #pragma endregion
 
 
@@ -220,6 +268,9 @@ int main(int argc, char *argv[]){
     }
     
     START:
+
+    delete_files_in_directory("symbols/");
+    rmdir("symbols/");
 
     FILE* config = fopen("config.txt", "r");
     if (config == NULL) {
@@ -450,7 +501,6 @@ int main(int argc, char *argv[]){
 
                         unzCloseCurrentFile(apk_file);
 
-                        // Store the loaded file in our array
                         strcpy(loaded_libs[lib_count].filename, filename);
                         loaded_libs[lib_count].data = buffer;
                         loaded_libs[lib_count].size = file_info.uncompressed_size;
@@ -476,6 +526,7 @@ int main(int argc, char *argv[]){
         #pragma endregion        
         #pragma region Analysis Part 2
         fprintf(stdout, LOG_WHITE "\nAnalyzing .SO files...\n" LOG_RESET);
+        MKDIR("symbols");
         for (int i = 0; i < lib_count; i++) {
             char* output_buffer = NULL;
             size_t buffer_size = 0;
@@ -484,15 +535,21 @@ int main(int argc, char *argv[]){
             snprintf(command, sizeof(command), "-T -C temp/%s", loaded_libs[i].filename);
 
             if (!run_exec_output("objdump", command, &output_buffer, &buffer_size)) {
-                FILE *out_file = fopen("symbols.txt", "wb");
+                char filename[sizeof(loaded_libs[i].filename)];
+                strcpy(filename, loaded_libs[i].filename);
+                    replace_char(filename, '/', '_');
+                char* replaced_filename = replace_str(filename, ".so", ".txt");
+                char* final_filename[sizeof(replaced_filename) + sizeof("symbols/")];
+                    sprintf(final_filename, "%s/%s", "symbols/", replaced_filename);
+
+                FILE *out_file = fopen(final_filename, "wb");
                 fwrite(output_buffer, 1, buffer_size, out_file);
                 fclose(out_file);
 
-                out_file = fopen("symbols.txt", "r");
+                out_file = fopen(final_filename, "r");
 
                 char line[MAX_LINE_LENGTH];
                 while (fgets(line, sizeof(line), out_file)) {
-                    // Remove trailing newline
                     line[strcspn(line, "\n")] = '\0';
 
                     if (strstr(line, "Java_") != NULL) {         
