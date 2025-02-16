@@ -96,8 +96,7 @@ int run_exec(char* program, char* args) {
 
 int run_exec_output(char* program, char* args, char** output_buffer, size_t* buffer_size) {
     char path[MAX_PATH_LENGTH] = {0};
-    
-    // Construct the path to the executable
+
     #ifdef _WIN32
         snprintf(path, sizeof(path), "%s\\arm-vita-eabi\\bin", vitasdk_path);
     #else
@@ -112,52 +111,46 @@ int run_exec_output(char* program, char* args, char** output_buffer, size_t* buf
         snprintf(command, sizeof(command), "%s/%s %s", path, program, args);
     #endif
 
-    // Open a pipe to execute the command and read the output
     FILE* fp = popen(command, "r");
     if (fp == NULL) {
         fprintf(stderr, LOG_RED "!!! Failed to execute %s. Please check the path of your VitaSDK installation.\nCommand: \"%s\"\n" LOG_RESET, program, command);
         return 1;
     }
 
-    // Initial buffer allocation
-    *buffer_size = 1024;  // Start with 1 KB
-    *output_buffer = (char*)malloc(*buffer_size);
+    // Allocate a buffer for output
+    size_t allocated_size = 1024;  // Initial buffer size
+    *output_buffer = (char*)malloc(allocated_size);
     if (*output_buffer == NULL) {
         fprintf(stderr, LOG_RED "!!! Memory allocation failed.\n" LOG_RESET);
         pclose(fp);
         return 1;
     }
 
-    size_t total_read = 0;
-    size_t chunk_size = 512;  // Read in 512-byte chunks
-    char temp_buffer[chunk_size];
+    size_t total_size = 0;
+    char temp_buffer[256];
 
-    while (fgets(temp_buffer, chunk_size, fp) != NULL) {
+    while (fgets(temp_buffer, sizeof(temp_buffer), fp) != NULL) {
         size_t len = strlen(temp_buffer);
-
-        // Check if we need to reallocate more memory
-        if (total_read + len + 1 >= *buffer_size) {
-            *buffer_size *= 2;  // Double the buffer size
-            char* temp = realloc(*output_buffer, *buffer_size);
-            if (temp == NULL) {
+        
+        if (total_size + len + 1 > allocated_size) {
+            allocated_size *= 2;
+            *output_buffer = (char*)realloc(*output_buffer, allocated_size);
+            if (*output_buffer == NULL) {
                 fprintf(stderr, LOG_RED "!!! Memory reallocation failed.\n" LOG_RESET);
-                free(*output_buffer);
                 pclose(fp);
                 return 1;
             }
-            *output_buffer = temp;
         }
 
-        // Append new data to the output buffer
-        memcpy(*output_buffer + total_read, temp_buffer, len);
-        total_read += len;
+        strcpy(*output_buffer + total_size, temp_buffer);
+        total_size += len;
     }
 
-    // Null-terminate the final output
-    (*output_buffer)[total_read] = '\0';
+    (*output_buffer)[total_size] = '\0';
+    *buffer_size = total_size;
 
     int ret_code = pclose(fp);
-    return ret_code;  // Return the process exit code
+    return ret_code;
 }
 
 int test_exec(char* program) {
